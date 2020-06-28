@@ -540,7 +540,10 @@ void VFDSpindle::set_enabled(const bool enable)
   {
     // stop
     set_current_direction(0);
+    auto tmp = power;
+    power = 0;
     power_delay();
+    power = tmp;
   }
   else if (power != 0 && direction != 0) // && enable
   {

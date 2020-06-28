@@ -737,7 +737,7 @@
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 1200, 1200, 600, 25 }
+#define DEFAULT_MAX_FEEDRATE          { 1000, 1000, 500, 25 }
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -1091,10 +1091,9 @@
 
 // @section machine
 
-// TODO FIXME
 // The size of the print bed
-#define X_BED_SIZE 580
-#define Y_BED_SIZE 445
+#define X_BED_SIZE 544
+#define Y_BED_SIZE 384
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
@@ -1102,7 +1101,7 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS 140
+#define Z_MAX_POS 110
 
 /**
  * Software Endstops
@@ -1365,8 +1364,8 @@
 #endif
 
 // Homing speeds (mm/m)
-#define HOMING_FEEDRATE_XY 1200
-#define HOMING_FEEDRATE_Z  600
+#define HOMING_FEEDRATE_XY 600
+#define HOMING_FEEDRATE_Z  300
 
 // Validate that endstops are triggered on homing moves
 #define VALIDATE_HOMING_ENDSTOPS

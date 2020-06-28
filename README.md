@@ -10,7 +10,7 @@
 Additional documentation can be found at the [Marlin Home Page](http://marlinfw.org/).
 Please let us know if Marlin misbehaves in any way. Volunteers are standing by!
 
-**ALL CREDITS GO TO THE AMAZING MARLIM TEAM**
+**ALL CREDITS GO TO THE MARLIM TEAM**
 
 ## Marlin 2.0
 
@@ -40,14 +40,12 @@ for sending digital data. Second, feedback. If you set your spindle to 10.000 RP
 want to start routing once (and NOT BEFORE) it reaches that speed. And third, if you start up your system, you want to know the 
 parameters before you start messing around with them. And last, if you plumb your drill bit into your piece, you want to make sure that 
 your spindle is running, which can be queried here. RS485 capabilities give you all that, along with all the options to configure
-your device. It's by far the best option to communicate with proper spindles.
+your device. It's by far the best option to communicate with serious spindles.
 
 The API interface itself that going to use is pretty much the same as the Spindle_laser code. In other words, I attempted to retain as 
 much of the original API as possible.
 
-**THIS IS A WIP!**
-
-Even though all code is currently implemented, it is by no means tested enough.
+Current status: tested & working.
 
 ## Building Marlin 2.0
 

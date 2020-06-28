@@ -869,7 +869,6 @@
  * vibration and surface artifacts. The algorithm adapts to provide the best possible step smoothing at the
  * lowest stepping frequencies.
  */
-// TODO FIXME
 //#define ADAPTIVE_STEP_SMOOTHING
 
 /**
@@ -1727,8 +1726,6 @@
 // The ASCII buffer for serial input
 #define MAX_CMD_SIZE 96
 #define BUFSIZE 4
-
-// TODO FIXME: Next section
 
 // Transmission to Host Buffer Size
 // To save 386 bytes of PROGMEM (and TX_BUFFER_SIZE+3 bytes of RAM) set to 0.
@@ -2852,7 +2849,6 @@
  *
  * Execute certain G-code commands immediately after power-on.
  */
-// TODO FIXME: Startup, well isn't this convenient :-)
 //#define STARTUP_COMMANDS "M17 Z"
 
 /**
