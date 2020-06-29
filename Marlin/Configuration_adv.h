@@ -2803,8 +2803,9 @@
  *
  * See https://marlinfw.org/docs/configuration/laser_spindle.html for more config details.
  */
-//#define SPINDLE_FEATURE
-//#define LASER_FEATURE
+
+// #define SPINDLE_FEATURE
+// #define LASER_FEATURE
 #if EITHER(SPINDLE_FEATURE, LASER_FEATURE)
   #define SPINDLE_LASER_ACTIVE_HIGH     false  // Set to "true" if the on/off function is active HIGH
   #define SPINDLE_LASER_PWM             true   // Set to "true" if your controller supports setting the speed/power
@@ -2937,6 +2938,27 @@
 #endif
 
 /**
+ * VFD Spindle
+ */
+
+#define SPINDLE_VFD         // Enable if you have an RS-485 Huanyang VFD [**experimental!**]
+
+#if ENABLED(SPINDLE_VFD)
+  // NOTE: Only RPM mode makes sense for VFD spindles
+
+  #define VFD_RX_PIN 17     // RS-485 RX pin
+  #define VFD_TX_PIN 16     // RS-485 TX pin
+  #define VFD_RTS_PIN 25    // RS-485 RTS pin
+   //#define VFD_RTS_PIN 23    // RS-485 RTS pin #2 when not using a single pin for both RX and TX
+  #define VFD_BAUD 19200    // Baud rate of VFD. 1200 baud is more than enough, but will stall the rest... 38400 it is.
+  #define VFD_ADDRESS 1     // Modbus address of the VFD
+  #define VFD_PARITY SERIAL_8E1
+
+  #define VFD_RS485_DEBUG   // VFD debugging, not so chatty
+  // #define VFD_RS485_DEBUG_PCK // VFD debugging of all communication, very chatty
+#endif
+
+/**
  * Coolant Control
  *
  * Add the M7, M8, and M9 commands to turn mist or flood coolant on and off.
@@ -2989,8 +3011,8 @@
  *
  * Enables G53 and G54-G59.3 commands to select coordinate systems
  * and G92.1 to reset the workspace to native machine space.
- */
 //#define CNC_COORDINATE_SYSTEMS
+#define CNC_COORDINATE_SYSTEMS
 
 /**
  * Auto-report temperatures with M155 S<seconds>

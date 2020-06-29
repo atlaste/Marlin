@@ -140,7 +140,7 @@
 // Spindle/Laser power display types
 // Defined here so sanity checks can use them
 //
-#if EITHER(SPINDLE_FEATURE, LASER_FEATURE)
+#if ANY(SPINDLE_FEATURE, LASER_FEATURE, SPINDLE_VFD)
   #define HAS_CUTTER 1
   #define _CUTTER_POWER_PWM255  1
   #define _CUTTER_POWER_PERCENT 2

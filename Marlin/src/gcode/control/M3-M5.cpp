@@ -25,7 +25,13 @@
 #if HAS_CUTTER
 
 #include "../gcode.h"
+
+#ifdef SPINDLE_VFD
+#include "../../feature/vfd_spindle.h"
+#else
 #include "../../feature/spindle_laser.h"
+#endif
+
 #include "../../module/stepper.h"
 
 /**
@@ -64,6 +70,12 @@
  *  (usually goes through a reset which sets all I/O pins to tri-state)
  *
  *  PWM duty cycle goes from 0 (off) to 255 (always on).
+ *
+ *  NOTE 2: VFD spindles do NOT have these limits. If we say 20.000 RPM,
+ *  we should simply get 20.000 RPM. If someone types 'S', we get the max
+ *  value, which is '-255' here. Negative values are [-1,-255], positive
+ *  values are RPM's. Also note that typical values like 24.000 are >=
+ *  the max value of an int16.
  */
 void GcodeSuite::M3_M4(const bool is_M4) {
   auto get_s_power = [] {
@@ -96,8 +108,16 @@ void GcodeSuite::M3_M4(const bool is_M4) {
 
   planner.synchronize();   // Wait for previous movement commands (G0/G0/G2/G3) to complete before changing power
   cutter.set_direction(is_M4);
+#if ENABLED(SPINDLE_VFD)
 
-  #if ENABLED(SPINDLE_LASER_PWM)
+  if (parser.seenval('O'))
+	  cutter.set_power(-int32_t(parser.value_byte()));
+  else
+	  cutter.set_power(parser.longval('S', -255));
+
+  cutter.set_enabled(true);
+
+#elif ENABLED(SPINDLE_LASER_PWM)
     if (parser.seenval('O')) {
       cutter.unitPower = cutter.power_to_range(parser.value_byte(), 0);
       cutter.set_ocr_power(cutter.unitPower); // The OCR is a value from 0 to 255 (uint8_t)
@@ -105,7 +125,9 @@ void GcodeSuite::M3_M4(const bool is_M4) {
     else
       cutter.set_power(cutter.upower_to_ocr(get_s_power()));
   #else
+
     cutter.set_enabled(true);
+
   #endif
   cutter.menuPower = cutter.unitPower;
 }
