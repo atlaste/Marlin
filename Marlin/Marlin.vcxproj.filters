@@ -4357,7 +4357,7 @@
     <ClInclude Include="src\feature\vfd_spindle.h">
       <Filter>src\feature</Filter>
     </ClInclude>
-    <ClInclude Include="src\pins\sam\pins_MY_CNC.h">
+    <ClInclude Include="src\pins\sam\pins_VFD_CNC.h">
       <Filter>src\pins\sam</Filter>
     </ClInclude>
   </ItemGroup>

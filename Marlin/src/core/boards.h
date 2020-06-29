@@ -25,9 +25,9 @@
 
 #define BOARD_UNKNOWN -1
 
-//
-// RAMPS 1.3 / 1.4 - ATmega1280, ATmega2560
-//
+ //
+ // RAMPS 1.3 / 1.4 - ATmega1280, ATmega2560
+ //
 
 #define BOARD_RAMPS_OLD               1000  // MEGA/RAMPS up to 1.2
 
@@ -273,7 +273,7 @@
 
 #define BOARD_PRINTRBOARD_G2          3100  // PRINTRBOARD G2
 #define BOARD_ADSK                    3101  // Arduino DUE Shield Kit (ADSK)
-#define BOARD_MY_CNC                  3102  // Arduino DUE based CNC
+#define BOARD_VFD_CNC                 3102  // Arduino DUE based simple VFD/CNC router
 
 //
 // STM32 ARM Cortex-M3

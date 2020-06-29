@@ -756,7 +756,7 @@
     <ClInclude Include="src\pins\sam\pins_CNCONTROLS_15D.h" />
     <ClInclude Include="src\pins\sam\pins_DUE3DOM.h" />
     <ClInclude Include="src\pins\sam\pins_DUE3DOM_MINI.h" />
-    <ClInclude Include="src\pins\sam\pins_MY_CNC.h" />
+    <ClInclude Include="src\pins\sam\pins_VFD_CNC.h" />
     <ClInclude Include="src\pins\sam\pins_PRINTRBOARD_G2.h" />
     <ClInclude Include="src\pins\sam\pins_RADDS.h" />
     <ClInclude Include="src\pins\sam\pins_RAMPS4DUE.h" />
