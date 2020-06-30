@@ -2025,9 +2025,6 @@
     <ClCompile Include="src\sd\usb_flashdrive\Sd2Card_FlashDrive.cpp">
       <Filter>src\sd\usb_flashdrive</Filter>
     </ClCompile>
-    <ClCompile Include="src\feature\cutters\spindle_laser.cpp">
-      <Filter>src\feature\cutters</Filter>
-    </ClCompile>
     <ClCompile Include="src\feature\cutter.cpp">
       <Filter>src\feature</Filter>
     </ClCompile>
@@ -2038,6 +2035,9 @@
       <Filter>src\feature\cutters</Filter>
     </ClCompile>
     <ClCompile Include="src\feature\cutters\debug_cutter.cpp">
+      <Filter>src\feature\cutters</Filter>
+    </ClCompile>
+    <ClCompile Include="src\feature\cutters\spindle_laser.cpp">
       <Filter>src\feature\cutters</Filter>
     </ClCompile>
   </ItemGroup>
@@ -4366,22 +4366,10 @@
     <ClInclude Include="src\pins\sam\pins_VFD_CNC.h">
       <Filter>src\pins\sam</Filter>
     </ClInclude>
-    <ClInclude Include="src\feature\cutters\spindle_laser.h">
-      <Filter>src\feature\cutters</Filter>
-    </ClInclude>
     <ClInclude Include="src\feature\cutters\cutter_base.h">
       <Filter>src\feature\cutters</Filter>
     </ClInclude>
-    <ClInclude Include="src\feature\cutters\pwm_spindle.h">
-      <Filter>src\feature\cutters</Filter>
-    </ClInclude>
-    <ClInclude Include="src\feature\cutters\pwm_laser.h">
-      <Filter>src\feature\cutters</Filter>
-    </ClInclude>
     <ClInclude Include="src\feature\cutters\vfd_h2x.h">
-      <Filter>src\feature\cutters</Filter>
-    </ClInclude>
-    <ClInclude Include="src\feature\cutters\pwm_cutter_base.h">
       <Filter>src\feature\cutters</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\cutter.h">
@@ -4394,6 +4382,9 @@
       <Filter>src\feature</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\cutters\vfd_modbus.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\spindle_laser.h">
       <Filter>src\feature\cutters</Filter>
     </ClInclude>
   </ItemGroup>

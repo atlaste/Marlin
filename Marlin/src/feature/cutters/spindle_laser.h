@@ -23,11 +23,15 @@
 /**
  * feature/spindle_laser.h
  * Support for Laser Power or Spindle Power & Direction
+ *
+ * TODO: Handle the spindle_laser class through the cutter base class.
+ * Unfortunately, this class currently has so much functionality and
+ * so many static methods, it's not really easy to do that...
  */
 
 #include "../../inc/MarlinConfig.h"
 
-#include "../spindle_laser_types.h"
+#include "../cutter_types.h"
 
 #if ENABLED(LASER_POWER_INLINE)
   #include "../../module/planner.h"
@@ -53,10 +57,12 @@ class SpindleLaser {
   static const inline uint8_t cpwr_to_pct(const cutter_cpower_t cpwr) { // configured value to pct
     return unitPower ? round(100 * (cpwr - SPEED_POWER_FLOOR) / (SPEED_POWER_MAX - SPEED_POWER_FLOOR)) : 0;
   }
-public:
 
+public:
   // Convert a configured value (cpower)(ie SPEED_POWER_STARTUP) to unit power (upwr, upower),
   // which can be PWM, Percent, or RPM (rel/abs).
+  //
+  // Used by M3/M5 for startup power.
   static const inline cutter_power_t cpwr_to_upwr(const cutter_cpower_t cpwr) { // STARTUP power to Unit power
     const cutter_power_t upwr = (
       #if ENABLED(SPINDLE_FEATURE)
@@ -87,17 +93,15 @@ public:
   static bool isReady;                    // Ready to apply power setting from the UI to OCR
   static uint8_t power;
 
-  #if ENABLED(MARLIN_DEV_MODE)
-    static cutter_frequency_t frequency;  // Set PWM frequency; range: 2K-50K
-  #endif
-
   static cutter_power_t menuPower,        // Power as set via LCD menu in PWM, Percentage or RPM
                         unitPower;        // Power as displayed status in PWM, Percentage or RPM
 
   static void init();
 
   #if ENABLED(MARLIN_DEV_MODE)
-    static inline void refresh_frequency() { set_pwm_frequency(pin_t(SPINDLE_LASER_PWM_PIN), frequency); }
+  static cutter_frequency_t frequency;  // Set PWM frequency; range: 2K-50K
+
+  static inline void refresh_frequency() { set_pwm_frequency(pin_t(SPINDLE_LASER_PWM_PIN), frequency); }
   #endif
 
   // Modifying this function should update everywhere

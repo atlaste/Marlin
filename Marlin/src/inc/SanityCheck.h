@@ -2844,61 +2844,18 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
 #if HAS_CUTTER
   #ifndef CUTTER_POWER_UNIT
     #error "CUTTER_POWER_UNIT is required with a spindle or laser. Please update your Configuration_adv.h."
-  #elif !CUTTER_UNIT_IS(PWM255) && !CUTTER_UNIT_IS(PERCENT) && !CUTTER_UNIT_IS(RPM)
+  #elif !CUTTER_POWER_UNIT_IS(PWM255) && !CUTTER_POWER_UNIT_IS(PERCENT) && !CUTTER_POWER_UNIT_IS(RPM)
     #error "CUTTER_POWER_UNIT must be PWM255, PERCENT, or RPM. Please update your Configuration_adv.h."
   #endif
 
-  #if ENABLED(LASER_POWER_INLINE)
-    #if ENABLED(SPINDLE_CHANGE_DIR)
-      #error "SPINDLE_CHANGE_DIR and LASER_POWER_INLINE are incompatible."
-    #elif ENABLED(LASER_MOVE_G0_OFF) && DISABLED(LASER_MOVE_POWER)
-      #error "LASER_MOVE_G0_OFF requires LASER_MOVE_POWER. Please update your Configuration_adv.h."
-    #endif
-    #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
-      #if DISABLED(SPINDLE_LASER_PWM)
-        #error "LASER_POWER_INLINE_TRAPEZOID requires SPINDLE_LASER_PWM to function."
-      #elif ENABLED(S_CURVE_ACCELERATION)
-        //#ifndef LASER_POWER_INLINE_S_CURVE_ACCELERATION_WARN
-        //  #define LASER_POWER_INLINE_S_CURVE_ACCELERATION_WARN
-        //  #warning "Combining LASER_POWER_INLINE_TRAPEZOID with S_CURVE_ACCELERATION may result in unintended behavior."
-        //#endif
-      #endif
-    #endif
-    #if ENABLED(LASER_POWER_INLINE_INVERT)
-      //#ifndef LASER_POWER_INLINE_INVERT_WARN
-      //  #define LASER_POWER_INLINE_INVERT_WARN
-      //  #warning "Enabling LASER_POWER_INLINE_INVERT means that `M5` won't kill the laser immediately; use `M5 I` instead."
-      //#endif
-    #endif
-  #else
-    #if SPINDLE_LASER_POWERUP_DELAY < 1
-      #error "SPINDLE_LASER_POWERUP_DELAY must be greater than 0."
-    #elif SPINDLE_LASER_POWERDOWN_DELAY < 1
-      #error "SPINDLE_LASER_POWERDOWN_DELAY must be greater than 0."
-    #elif ENABLED(LASER_MOVE_POWER)
-      #error "LASER_MOVE_POWER requires LASER_POWER_INLINE."
-    #elif ANY(LASER_POWER_INLINE_TRAPEZOID, LASER_POWER_INLINE_INVERT, LASER_MOVE_G0_OFF, LASER_MOVE_POWER)
-      #error "Enabled an inline laser feature without inline laser power being enabled."
-    #endif
-  #endif
-  #define _PIN_CONFLICT(P) (PIN_EXISTS(P) && P##_PIN == SPINDLE_LASER_PWM_PIN)
-  #if BOTH(SPINDLE_FEATURE, LASER_FEATURE)
-    #error "Enable only one of SPINDLE_FEATURE or LASER_FEATURE."
-  #elif ENABLED(SPINDLE_VFD)
-   // Not much to do here.
-  #elif !PIN_EXISTS(SPINDLE_LASER_ENA)
-    #error "(SPINDLE|LASER)_FEATURE requires SPINDLE_LASER_ENA_PIN."
-  #elif ENABLED(SPINDLE_CHANGE_DIR) && !PIN_EXISTS(SPINDLE_DIR)
-    #error "SPINDLE_DIR_PIN is required for SPINDLE_CHANGE_DIR."
-  #elif ENABLED(SPINDLE_LASER_PWM)
-    #if !defined(SPINDLE_LASER_PWM_PIN) || SPINDLE_LASER_PWM_PIN < 0
-      #error "SPINDLE_LASER_PWM_PIN is required for SPINDLE_LASER_PWM."
-    #elif !PWM_PIN(SPINDLE_LASER_PWM_PIN)
-      #error "SPINDLE_LASER_PWM_PIN not assigned to a PWM pin."
-    #elif !defined(SPINDLE_LASER_PWM_INVERT)
-      #error "SPINDLE_LASER_PWM_INVERT is required for (SPINDLE|LASER)_FEATURE."
-    #elif !(defined(SPEED_POWER_INTERCEPT) && defined(SPEED_POWER_MIN) && defined(SPEED_POWER_MAX) && defined(SPEED_POWER_STARTUP))
-      #error "SPINDLE_LASER_PWM equation constant(s) missing."
+  #if ENABLED(VFD_MODBUS)
+    #define _PIN_CONFLICT(P) (PIN_EXISTS(P) && (P##_PIN == VFD_MODBUS_RX_PIN || P##_PIN == VFD_MODBUS_TX_PIN || P##_PIN == VFD_MODBUS_RTS_PIN))
+    #if !PIN_EXISTS(VFD_MODBUS_RX)
+      #error "VFD modbus requires VFD_MODBUS_RX_PIN."
+    #elif !PIN_EXISTS(VFD_MODBUS_TX)
+      #error "VFD modbus requires VFD_MODBUS_TX_PIN."
+    #elif !PIN_EXISTS(VFD_MODBUS_RTS)
+      #error "VFD modbus requires VFD_MODBUS_RTS_PIN."
     #elif _PIN_CONFLICT(X_MIN)
       #error "SPINDLE_LASER_PWM pin conflicts with X_MIN_PIN."
     #elif _PIN_CONFLICT(X_MAX)
@@ -2948,8 +2905,113 @@ static_assert(   _ARR_TEST(3,0) && _ARR_TEST(3,1) && _ARR_TEST(3,2)
     #elif _PIN_CONFLICT(MOTOR_CURRENT_PWM_E)
       #error "SPINDLE_LASER_PWM_PIN conflicts with MOTOR_CURRENT_PWM_E."
     #endif
-  #endif
-  #undef _PIN_CONFLICT
+    #undef _PIN_CONFLICT
+  #endif 
+
+  #if ENABLED(CUTTER_TYPE_PWM_SPINDLE) || ENABLED(CUTTER_TYPE_PWM_LASER)
+    #if ENABLED(LASER_POWER_INLINE)
+      #if ENABLED(SPINDLE_CHANGE_DIR)
+        #error "SPINDLE_CHANGE_DIR and LASER_POWER_INLINE are incompatible."
+      #elif ENABLED(LASER_MOVE_G0_OFF) && DISABLED(LASER_MOVE_POWER)
+        #error "LASER_MOVE_G0_OFF requires LASER_MOVE_POWER. Please update your Configuration_adv.h."
+      #endif
+      #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
+        #if DISABLED(SPINDLE_LASER_PWM)
+          #error "LASER_POWER_INLINE_TRAPEZOID requires SPINDLE_LASER_PWM to function."
+        #elif ENABLED(S_CURVE_ACCELERATION)
+          //#ifndef LASER_POWER_INLINE_S_CURVE_ACCELERATION_WARN
+          //  #define LASER_POWER_INLINE_S_CURVE_ACCELERATION_WARN
+          //  #warning "Combining LASER_POWER_INLINE_TRAPEZOID with S_CURVE_ACCELERATION may result in unintended behavior."
+          //#endif
+        #endif
+      #endif
+      #if ENABLED(LASER_POWER_INLINE_INVERT)
+        //#ifndef LASER_POWER_INLINE_INVERT_WARN
+        //  #define LASER_POWER_INLINE_INVERT_WARN
+        //  #warning "Enabling LASER_POWER_INLINE_INVERT means that `M5` won't kill the laser immediately; use `M5 I` instead."
+        //#endif
+      #endif
+    #else
+      #if SPINDLE_LASER_POWERUP_DELAY < 1
+        #error "SPINDLE_LASER_POWERUP_DELAY must be greater than 0."
+      #elif SPINDLE_LASER_POWERDOWN_DELAY < 1
+        #error "SPINDLE_LASER_POWERDOWN_DELAY must be greater than 0."
+      #elif ENABLED(LASER_MOVE_POWER)
+        #error "LASER_MOVE_POWER requires LASER_POWER_INLINE."
+      #elif ANY(LASER_POWER_INLINE_TRAPEZOID, LASER_POWER_INLINE_INVERT, LASER_MOVE_G0_OFF, LASER_MOVE_POWER)
+        #error "Enabled an inline laser feature without inline laser power being enabled."
+      #endif
+    #endif
+    #define _PIN_CONFLICT(P) (PIN_EXISTS(P) && P##_PIN == SPINDLE_LASER_PWM_PIN)
+    #if BOTH(SPINDLE_FEATURE, LASER_FEATURE)
+      #error "Enable only one of SPINDLE_FEATURE or LASER_FEATURE."
+    #elif ENABLED(SPINDLE_VFD)
+     // Not much to do here.
+    #elif !PIN_EXISTS(SPINDLE_LASER_ENA)
+      #error "(SPINDLE|LASER)_FEATURE requires SPINDLE_LASER_ENA_PIN."
+    #elif ENABLED(SPINDLE_CHANGE_DIR) && !PIN_EXISTS(SPINDLE_DIR)
+      #error "SPINDLE_DIR_PIN is required for SPINDLE_CHANGE_DIR."
+    #elif ENABLED(SPINDLE_LASER_PWM)
+      #if !defined(SPINDLE_LASER_PWM_PIN) || SPINDLE_LASER_PWM_PIN < 0
+        #error "SPINDLE_LASER_PWM_PIN is required for SPINDLE_LASER_PWM."
+      #elif !PWM_PIN(SPINDLE_LASER_PWM_PIN)
+        #error "SPINDLE_LASER_PWM_PIN not assigned to a PWM pin."
+      #elif !defined(SPINDLE_LASER_PWM_INVERT)
+        #error "SPINDLE_LASER_PWM_INVERT is required for (SPINDLE|LASER)_FEATURE."
+      #elif !(defined(SPEED_POWER_INTERCEPT) && defined(SPEED_POWER_MIN) && defined(SPEED_POWER_MAX) && defined(SPEED_POWER_STARTUP))
+        #error "SPINDLE_LASER_PWM equation constant(s) missing."
+      #elif _PIN_CONFLICT(X_MIN)
+        #error "SPINDLE_LASER_PWM pin conflicts with X_MIN_PIN."
+      #elif _PIN_CONFLICT(X_MAX)
+        #error "SPINDLE_LASER_PWM pin conflicts with X_MAX_PIN."
+      #elif _PIN_CONFLICT(Z_STEP)
+        #error "SPINDLE_LASER_PWM pin conflicts with Z_STEP_PIN."
+      #elif _PIN_CONFLICT(CASE_LIGHT)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with CASE_LIGHT_PIN."
+      #elif _PIN_CONFLICT(E0_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E0_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(E1_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E1_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(E2_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E2_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(E3_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E3_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(E4_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E4_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(E5_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E5_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(E6_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E6_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(E7_AUTO_FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with E7_AUTO_FAN_PIN."
+      #elif _PIN_CONFLICT(FAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN_PIN."
+      #elif _PIN_CONFLICT(FAN1)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN1_PIN."
+      #elif _PIN_CONFLICT(FAN2)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN2_PIN."
+      #elif _PIN_CONFLICT(FAN3)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN3_PIN."
+      #elif _PIN_CONFLICT(FAN4)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN4_PIN."
+      #elif _PIN_CONFLICT(FAN5)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN5_PIN."
+      #elif _PIN_CONFLICT(FAN6)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN6_PIN."
+      #elif _PIN_CONFLICT(FAN7)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with FAN7_PIN."
+      #elif _PIN_CONFLICT(CONTROLLERFAN)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with CONTROLLERFAN_PIN."
+      #elif _PIN_CONFLICT(MOTOR_CURRENT_PWM_XY)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with MOTOR_CURRENT_PWM_XY."
+      #elif _PIN_CONFLICT(MOTOR_CURRENT_PWM_Z)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with MOTOR_CURRENT_PWM_Z."
+      #elif _PIN_CONFLICT(MOTOR_CURRENT_PWM_E)
+        #error "SPINDLE_LASER_PWM_PIN conflicts with MOTOR_CURRENT_PWM_E."
+      #endif
+    #endif
+    #undef _PIN_CONFLICT
+  #endif 
 #endif
 
 #if !HAS_GRAPHICAL_LCD

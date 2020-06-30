@@ -22,7 +22,7 @@
 #pragma once
 
 /**
- * feature/spindle_laser_types.h
+ * feature/cutter_types.h
  *
  * Support for Laser Power or Spindle Power & Direction
  */
@@ -38,7 +38,7 @@
 
 typedef uint16_t cutter_cpower_t;
 
-#if CUTTER_POWER_UNIT_DISPLAY_IS(RPM) && SPEED_POWER_MAX > 255
+#if CUTTER_POWER_UNIT_IS(RPM) && SPEED_POWER_MAX > 255
   typedef uint16_t cutter_power_display_t;
   #define CUTTER_MENU_POWER_TYPE uint16_5
   #define cutter_power2str       ui16tostr5rj

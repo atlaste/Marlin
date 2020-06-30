@@ -26,7 +26,7 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if HAS_CUTTER_TYPE(PWM_SPINDLE)
+#if HAS_CUTTER_TYPE(PWM_SPINDLE) || HAS_CUTTER_TYPE(PWM_LASER)
 
 #include "spindle_laser.h"
 
@@ -112,4 +112,4 @@ void SpindleLaser::apply_power(const uint8_t opwr) {
   }
 #endif
 
-#endif //HAS_CUTTER_TYPE(PWM_SPINDLE)
+#endif //HAS_CUTTER_TYPE(PWM_SPINDLE) || HAS_CUTTER_TYPE(PWM_LASER)

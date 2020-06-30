@@ -142,46 +142,19 @@
 //
 #if ENABLED(CUTTER_FEATURE)
   #define HAS_CUTTER 1
-  #define _CUTTER_TYPE_UNDEF        0
   #define _CUTTER_TYPE_PWM_SPINDLE  1
   #define _CUTTER_TYPE_PWM_LASER    2
   #define _CUTTER_TYPE_VFD_H2X      3
-  #define _CUTTER_TYPE(V)      _CAT(_CUTTER_TYPE_, V)
-  #define _CUTTER_INST(N)      _CAT(CUTTER_TYPE_, N)
-  #ifndef CUTTER_TYPE_1
-    #define CUTTER_TYPE_1 UNDEF
-  #endif
-  #ifndef CUTTER_TYPE_2
-    #define CUTTER_TYPE_2 UNDEF
-  #endif
-  #ifndef CUTTER_TYPE_3
-    #define CUTTER_TYPE_3 UNDEF
-  #endif
-  #ifndef CUTTER_TYPE_4
-    #define CUTTER_TYPE_4 UNDEF
-  #endif
+  #define _CUTTER_TYPE(V)           _CAT(_CUTTER_TYPE_, V)
+  #define _CUTTER_TYPE_VAL(V)       _CAT(_, V)
 
-  #define HAS_CUTTER_TYPE(V)   ((_CUTTER_TYPE(CUTTER_TYPE_1) == _CUTTER_TYPE(V)) ||
-                                (_CUTTER_TYPE(CUTTER_TYPE_2) == _CUTTER_TYPE(V)) ||
-                                (_CUTTER_TYPE(CUTTER_TYPE_3) == _CUTTER_TYPE(V)) ||
-                                (_CUTTER_TYPE(CUTTER_TYPE_4) == _CUTTER_TYPE(V)))
-  #define HAS_CUTTER_INST(N)   (_CUTTER_TYPE(CUTTER_TYPE_1) != _CUTTER_TYPE_UNDEF)
-  #define HAS_SINGLE_CUTTER    HAS_CUTTER_INST(1) && !HAS_CUTTER_INST(2) && !HAS_CUTTER_INST(3) && !HAS_CUTTER_INST(4)
-
-  // if V is PWM_LASER and N = 1, CUTTER_TYPE_INST evaluates to CUTTER_INIT_2(N),
-  // which should be defined in the pwm_laser implementation and map to the PWMLaser class
-  // The constructor can be called with the correct arguments like pin configuration from
-  // instance N by using CUTTER_INSTANCE_CONSTRUCT(N), which evaluates to CUTTER_BUILD_2(N)
-  #define CUTTER_TYPE_INST(V, N) _CAT(CUTTER_INIT_, _CUTTER_TYPE(V))(N)
-  #define CUTTER_INSTANCE_TYPE(N)  CUTTER_TYPE_INST(CUTTER_INST(N))
-  #define CUTTER_BUILD_INST(V, N) _CAT(CUTTER_BUILD_, _CUTTER_TYPE(V))(N)
-  #define CUTTER_INSTANCE_BUILD(N) CUTTER_BUILD_INST(CUTTER_INST(N))
+  #define HAS_CUTTER_TYPE(V)   (_CUTTER_TYPE_VAL(CUTTER_TYPE) == _CUTTER_TYPE(V))
 
   #define _CUTTER_POWER_PWM255  1
   #define _CUTTER_POWER_PERCENT 2
   #define _CUTTER_POWER_RPM     3
   #define _CUTTER_POWER(V)      _CAT(_CUTTER_POWER_, V)
-  #define CUTTER_POWER_UNIT_DISPLAY_IS(V)    (_CUTTER_POWER(CUTTER_POWER_UNIT_DISPLAY)    == _CUTTER_POWER(V))
+  #define CUTTER_POWER_UNIT_IS(V)    (_CUTTER_POWER(CUTTER_POWER_UNIT)    == _CUTTER_POWER(V))
 
 #endif
 

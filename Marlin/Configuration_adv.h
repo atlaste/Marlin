@@ -2794,16 +2794,7 @@
  * Add the M3, M4, and M5 commands to turn the spindle/laser on and off, and
  * to set spindle speed, spindle direction, and laser power.
  *
- * 
- *
- * SuperPid is a router/spindle speed controller used in the CNC milling community.
- * Marlin can be used to turn the spindle on and off. It can also be used to set
- * the spindle speed from 5,000 to 30,000 RPM.
- *
- * You'll need to select a pin for the ON/OFF function and optionally choose a 0-5V
- * hardware PWM pin for the speed control and a pin for the rotation direction.
- *
- * See https://marlinfw.org/docs/configuration/laser_spindle.html for more config details.
+ * Spindles and cutters can be controlled in a large variety of ways. 
  */
 
 #define CUTTER_FEATURE
@@ -2822,42 +2813,18 @@
    * this value is displayed on an optional LCD, in terms of:
    *  - PWM255  (0 - 255)
    *  - PERCENT (0 - 100)
-   *  - RPM     (0 - 50000)  Best for use with a spindle
+   *  - RPM     (0 - 50000)  Best for use with a spindle, and the ONLY supported choice for VFD/modbus
    */
-  #define CUTTER_POWER_UNIT_DISPLAY RPM
+  #define CUTTER_POWER_UNIT RPM
 
   /**
-   * If you have a setup with multiple spindles, or a combination between a spindle and a VFD,
-   * you should configure the number of spindles, as well as the way the protocol with these
-   * spindles work. Up to 4 spindles are currently supported, which should be more than enough
-   * for most setups.
-   *
-   * SPINDLE_1_TYPE evaluates to the default spindle.
-   *
    * Currently supported cutter types: VFD_H2x, PWM_LASER, PWM_SPINDLE
    * 
    * Known other spindle types, which are not implemented yet: Brushless DC Speed controllers (BESC),
    * analog DAC, Modbus VFD, other Huanyang VFD, (usually relay based) digital input, on/off relay
    * spindles (kress is a common choice).
    */
-  #define CUTTER_TYPE_1 VFD_H2x
-  #define CUTTER_TYPE_2 PWM_LASER
-  #define CUTTER_TYPE_3 PWM_SPINDLE
-  // #define CUTTER_TYPE_4 PWM_SPINDLE
-
-  /**
-   * If you have multiple spindles or spindle/laser combinations, the way to change between these
-   * is to do a tool change.
-   *
-   * Marlin defines T0, T1, T2, T3, T4, T5, T6 in G-Code: https://marlinfw.org/docs/gcode/T001-T002.html
-   * Note that enabling tool changes for spindle selection is optional, and is only relevant if multiple
-   * spindles are present in your system.
-   */
-  #define CUTTER_TOOL_1 0 // Maps to T0
-  #define CUTTER_TOOL_2 2 // Maps to T2
-  #define CUTTER_TOOL_3 3 // Maps to T3
-  // #define CUTTER_TOOL_4 4 // Maps to T4
-
+  #define CUTTER_TYPE_VFD_H2x
 
   /**
     * Enable inline laser power to be handled in the planner / stepper routines.
@@ -2934,10 +2901,15 @@
   /**
    * Configuration of individual cutters starts here:
    */
+  #if ENABLED(CUTTER_TYPE_PWM_SPINDLE)
 
-  #if HAS_CUTTER_TYPE(PWM_SPINDLE)
     /**
      * PWM controlled spindles (which includes simple on-off spindles).
+     *
+     * You'll need to select a pin for the ON/OFF function and optionally choose a 0-5V
+     * hardware PWM pin for the speed control and a pin for the rotation direction.
+     *
+     * See https ://marlinfw.org/docs/configuration/laser_spindle.html for more config details.
      */
     #define PWM_SPINDLE_ACTIVE_HIGH     false  // Set to "true" if the on/off function is active HIGH
     #define PWM_SPINDLE_PWM             true   // Set to "true" if your controller supports setting the speed/power
@@ -2952,6 +2924,10 @@
      * OCR power is relative to the range PWM_SPINDLE_SPEED_MIN...PWM_SPINDLE_SPEED_MAX.
      * so input powers of 0...255 correspond to PWM_SPINDLE_SPEED_MIN...PWM_SPINDLE_SPEED_MAX.
      * instead of normal range (0 to PWM_SPINDLE_SPEED_MAX).
+     *
+     * SuperPid is a router / spindle speed controller used in the CNC milling community.
+     * Marlin can be used to turn the spindle onand off. It can also be used to set
+     * the spindle speed from 5, 000 to 30, 000 RPM.
      *
      * Best used with (e.g.) SuperPID router controller: S0 = 5,000 RPM and S255 = 30,000 RPM
      */
@@ -2979,17 +2955,18 @@
     #define PWM_SPINDLE_SPEED_STARTUP       25000    // (RPM) M3/M4 speed/power default (with no arguments)
   #endif
 
-  #if HAS_SPINDLE_TYPE(PWM_LASER)
-  /**
-   * PWM controlled lasers.
-   *
-   * WARNING: Lasers are very dangerous pieces of hardware, and can instantly make people blind
-   * or cause serious burns when handled incorrectly. ALWAYS wear protective equipment while
-   * near them, and NEVER play around with wiring or settings while having the laser powered on!
-   */
-  #define PWM_LASER_ACTIVE_HIGH     false     // Set to "true" if the on/off function is active HIGH
-  #define PWM_LASER_PWM_INVERT      false     // Set to "true" if the power goes up when you want it to go down
-  #define PWM_LASER_FREQUENCY       2500      // (Hz) Spindle/laser frequency (only on supported HALs: AVR and LPC)
+  #if ENABLED(CUTTER_TYPE_PWM_LASER)
+
+    /**
+     * PWM controlled lasers.
+     *
+     * WARNING: Lasers are very dangerous pieces of hardware, and can instantly make people blind
+     * or cause serious burns when handled incorrectly. ALWAYS wear protective equipment while
+     * near them, and NEVER play around with wiring or settings while having the laser powered on!
+     */
+    #define PWM_LASER_ACTIVE_HIGH     false     // Set to "true" if the on/off function is active HIGH
+    #define PWM_LASER_PWM_INVERT      false     // Set to "true" if the power goes up when you want it to go down
+    #define PWM_LASER_FREQUENCY       2500      // (Hz) Spindle/laser frequency (only on supported HALs: AVR and LPC)
 
    /**
     * Relative Cutter Power
@@ -3020,7 +2997,7 @@
     #endif
   #endif
 
-  #if HAS_SPINDLE_TYPE(VFD_H2x)
+  #if ENABLED(CUTTER_TYPE_VFD_H2x)
     #define VFD_MODBUS                            // VFD_H2x implies RS485 modbus
 
     /**

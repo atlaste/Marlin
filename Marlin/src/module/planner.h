@@ -63,11 +63,7 @@
 #endif
 
 #if HAS_CUTTER
-	#ifdef SPINDLE_VFD
-	#include "../feature/vfd_spindle.h"
-	#else
-	#include "../feature/spindle_laser_types.h"
-	#endif
+	#include "../feature/cutter_types.h"
 #endif
 
 #if ENABLED(DIRECT_STEPPING)

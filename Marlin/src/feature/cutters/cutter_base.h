@@ -54,10 +54,10 @@ struct CutterProperties
  * Base class for all cutter devices. This class merely shows the API, but doesn't actually
  * provide any real functionality. As such, it also doesn't expose any members.
  *
- * Because we don't want to do too many v-table calls during normal operations, most of the
- * calls are 
- *
- * TODO: We could static_assert the interface of a derived type by using SFINAE.
+ * Note that we don't actually do any v-table calls. This isn't really about performance, but
+ * more about that I didn't want to change everything right away. The reason it's set up like
+ * this, is to support multiple cutters in the future. Think f.ex about having a laser next
+ * to your spindle (which is quite common).
  */
 class CutterBase
 {
@@ -71,7 +71,4 @@ public:
   
   virtual void kill() = 0;
   virtual void kill_sync() = 0;
-
-  // ???
-  virtual bool isReady() = 0;
 };

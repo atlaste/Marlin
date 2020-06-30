@@ -36,6 +36,10 @@
  * the spindles folder. The spindle_base class in the spindles folder has
  * several derived classes, each with a different spindle or laser implementation.
  *
+ * For simplicity, I currently implemented only one instance of a cutter. However,
+ * it is relatively easy to change this implementation to support multiple cutter
+ * instances.
+ *
  * This class has all the code required for the LCDs, the planner and the
  * g-codes. Each physical spindle configured in the configuration_adv.h file is
  * converted to an instance here, which is instantiated only once. During the runtime,
@@ -47,23 +51,23 @@
 #if ENABLED(CUTTER_FEATURE)
 
 #include "cutter_types.h"
-#include "cutters/cutter_base.h"
-
-// Include all different types of cutters here:
-#if HAS_CUTTER_TYPE(PWM_SPINDLE)
-  #include "cutters/pwm_spindle.h"
-#endif
-
-#if HAS_CUTTER_TYPE(PWM_LASER)
-  #include "cutters/pwm_laser.h"
-#endif
-
-#if HAS_CUTTER_TYPE(VFD_H2X)
-  #include "cutters/vfd_h2x.h"
-#endif
 
 #if ENABLED(LASER_POWER_INLINE)
   #include "../module/planner.h"
+#endif
+
+#if HAS_CUTTER_TYPE(PWM_LASER) || HAS_CUTTER_TYPE(PWM_SPINDLE)
+  #include "cutters/pwm_laser.h"
+
+  extern SpindleLaser cutter;
+#else
+
+#include "cutters/cutter_base.h"
+
+// Include all different types of cutters here:
+#if HAS_CUTTER_TYPE(VFD_H2X)
+  #include "cutters/vfd_h2x.h"
+  #define SPINDLE_CLASS VFD_H2x
 #endif
 
 #define PCT_TO_PWM(X) ((X) * 255 / 100)
@@ -75,8 +79,7 @@ class Cutter
   // will compile all the plumbing away, which means that this will basically decay to the old
   // implementation that only supported one cutter.
 
-#if HAS_SINGLE_CUTTER
-  static CUTTER_INSTANCE_TYPE(1) current;
+  static SPINDLE_CLASS current;
   static CutterState state;
   static CutterProperties currentProperties;
 
@@ -84,54 +87,11 @@ class Cutter
   {
     current.request_state(&state);
   }
-#else
-  static CutterBase* current;
-  static CutterState state;
-  static CutterProperties currentProperties;
-
-  // Define the cutter instances here. For each type of cutter, we have 1 instance:
-  #if HAS_CUTTER_INST(1)
-    static CUTTER_INSTANCE_TYPE(1) cutter1;
-  #endif
-  #if HAS_CUTTER_INST(2)
-    static CUTTER_INSTANCE_TYPE(2) cutter2;
-  #endif
-  #if HAS_CUTTER_INST(3)
-    static CUTTER_INSTANCE_TYPE(3) cutter3;
-  #endif
-  #if HAS_CUTTER_INST(4)
-    static CUTTER_INSTANCE_TYPE(4) cutter4;
-  #endif
-
-  static inline CutterBase* get_cutter_instance(uint8_t instance)
-  {
-    switch (instance)
-    {
-    case 2:
-#if HAS_CUTTER_INST(2)
-      return &cutter2;
-#endif
-#if HAS_CUTTER_INST(3)
-      return &cutter3;
-#endif
-#if HAS_CUTTER_INST(4)
-      return &cutter4;
-#endif
-
-    default:
-#if HAS_CUTTER_INST(1)
-      return &cutter1;
-#else
-#error "Cutter 1 has to be defined for spindles/lasers to work.";
-#endif
-    }
-  }
 
   static inline void update_state()
   {
-    current->request_state(&state);
+    current.request_state(&state);
   }
-#endif
 
 public:
   /**
@@ -140,44 +100,9 @@ public:
 
   static inline void init()
   {
-#if HAS_SINGLE_CUTTER
     current.init();
     currentProperties = current.cutter_info();
-#elif HAS_CUTTER_INST(1)
-    cutter1.init();
-    current = &cutter1;
-    currentProperties = cutter1.cutter_info();
-#else
-  #error "Cutter 1 has to be defined for spindles/lasers to work.";
-#endif
-
-#if HAS_CUTTER_INST(2)
-    cutter2.init();
-#endif
-
-#if HAS_CUTTER_INST(3)
-    cutter3.init();
-#endif
-
-#if HAS_CUTTER_INST(4)
-    cutter4.init();
-#endif
   }
-
-#if HAS_SINGLE_CUTTER
-  static inline void tool_change(const uint8_t ) {}
-#else
-  static inline void tool_change(const uint8_t tool)
-  {
-    // TODO FIXME: Fix mapping of tool <> instance!? Is this implementation correctly?
-    if (current != nullptr) {
-      current->kill();
-    }
-
-    current = get_cutter_instance(tool);
-    currentProperties = current->cutter_info();
-  }
-#endif
 
   static inline void set_enabled(const bool enable)
   {
@@ -191,25 +116,6 @@ public:
     update_state();
   }
 
-  static void set_ocr_power(const uint8_t value)
-  {
-    // While it might seem like a good solution to set the OCR power directly
-    // on the PWM class, it is actually wrong. If a direction change, or enable
-    // comes by, the spindle might be disabled and re-enabled, which gets rid of
-    // the old state.
-    //
-    // Easiest solution is to simply translate everything into RPM. And be careful
-    // with rounding:
-    //
-    // current->min_speed() translates to value == 0
-    // current->max_speed() translates to value == 255
-
-    auto speed = uint16_t(currentProperties.min_speed +
-                          int32_t((currentProperties.max_speed - currentProperties.min_speed) * value) / 255);
-    state.speed = speed;
-    update_state();
-  }
-
   static inline void set_power(const cutter_power_t value)
   {
     state.speed = value;
@@ -220,42 +126,8 @@ public:
   {
     // KILL first, then SYNC until it's done! We want to stop everything as
     // quickly as possible if someone asks for a kill for whatever reasons.
-
-#if HAS_SINGLE_CUTTER
-    cutter1.kill();
-#elif HAS_CUTTER_INST(1)
-    cutter1.kill();
-#endif
-
-#if HAS_CUTTER_INST(2)
-    cutter2.kill();
-#endif
-
-#if HAS_CUTTER_INST(3)
-    cutter3.kill();
-#endif
-
-#if HAS_CUTTER_INST(4)
-    cutter4.kill();
-#endif
-
-#if HAS_SINGLE_CUTTER
-    cutter1.kill_sync();
-#elif HAS_CUTTER_INST(1)
-    cutter1.kill_sync();
-#endif
-
-#if HAS_CUTTER_INST(2)
-    cutter2.kill_sync();
-#endif
-
-#if HAS_CUTTER_INST(3)
-    cutter3.kill_sync();
-#endif
-
-#if HAS_CUTTER_INST(4)
-    cutter4.kill_sync();
-#endif
+    current.kill();
+    current.kill_sync();
   }
 
   /**
@@ -269,11 +141,7 @@ public:
 
   static inline bool isReady()
   {
-#if HAS_SINGLE_CUTTER
     return current.isReady();
-#else
-    return current->isReady();
-#endif
   }
 
 #if HAS_LCD_MENU
@@ -305,16 +173,14 @@ public:
 
   static inline void apply_block_power(const uint8_t inpow)
   {
-#if HAS_SINGLE_CUTTER
     return current.apply_power_immediately(inpow);
-#else
-    return current->apply_power_immediately(inpow);
-#endif
   }
 
 #endif
 };
 
 extern Cutter cutter;
+
+#endif
 
 #endif
