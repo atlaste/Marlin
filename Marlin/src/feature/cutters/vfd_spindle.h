@@ -20,56 +20,9 @@ typedef int32_t cutter_power_t;
 // See VFD protocol.md for details on the messaging. 
 class VFDSpindle
 {
-  // 50 bytes should be plenty for whatever the VFD can throw at us.
-  static const int RECEIVE_BUFFER_SIZE = 50;
-  static const int SEND_BUFFER_SIZE = 20;
-
-  // Some buffers:
-  static uint8_t vfd_receive_buffer[RECEIVE_BUFFER_SIZE];
-  static uint8_t vfd_send_buffer[SEND_BUFFER_SIZE];
-
-#ifdef VFD_RS485_DEBUG
-  static inline void debug_rs485(bool sending, uint8_t* ptr, int size)
-  {
-    if (sending) {
-      SERIAL_ECHOPGM("Send: ");
-    }
-    else {
-      SERIAL_ECHOPGM("Recv: ");
-    }
-
-    char tmp[4];
-    for (int i = 0; i < size; ++i) {
-      uint8_t current = ptr[i];
-
-      tmp[0] = (char)("0123456789ABCDEF"[current >> 4]);
-      tmp[1] = (char)("0123456789ABCDEF"[current & 0xF]);
-      tmp[2] = ' ';
-      tmp[3] = '\0';
-      SERIAL_ECHOPGM(tmp);
-    }
-    SERIAL_ECHOPGM("\r\n");
-  }
-#endif
-
   // and some state variables:
   static int direction;
   static bool enabled;
-
-  // Helper functions with details:
-  static uint16_t get_crc_value(uint8_t* data_value, uint8_t length);
-
-  static void crc_check_value(uint8_t* data_value, uint8_t length);
-
-  static bool validate_crc_value(uint8_t* data_value, uint8_t length);
-
-  static void init_pins();
-
-  static int receive_data_detail();
-
-  static void send_data_detail(uint8_t* buffer, int length);
-
-  static int query(int send_length);
 
   // direction<0: reverse
   // direction>0: forward

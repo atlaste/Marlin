@@ -9,5 +9,16 @@
  */
 class DebugCutter : public CutterBase
 {
+  CutterState state;
+
 public:
+  void init() override;
+
+  const CutterProperties& cutter_info() override;
+
+  void request_state(const CutterState& newState) override;
+  void get_state(CutterState& result) override;
+
+  void kill() override;
+  void kill_sync() override;
 };

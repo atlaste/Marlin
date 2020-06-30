@@ -30,8 +30,14 @@
 
 #include "cutter.h"
 
-static CutterState state;
-static uint8_t current_instance;
+#if HAS_SINGLE_CUTTER
+CUTTER_INSTANCE_TYPE(1) Cutter::current CUTTER_INSTANCE_BUILD(1);
+CutterState Cutter::state;
+CutterProperties Cutter::currentProperties;
+#else
+CutterBase* Cutter::current = 0;
+CutterState Cutter::state;
+CutterProperties Cutter::currentProperties;
 
 // Define the cutter instances here. For each type of cutter, we have 1 instance:
 #if HAS_CUTTER(1)
@@ -47,20 +53,5 @@ CUTTER_INSTANCE_TYPE(3) Cutter::cutter3 CUTTER_INSTANCE_BUILD(3);
 CUTTER_INSTANCE_TYPE(4) Cutter::cutter4 CUTTER_INSTANCE_BUILD(4);
 #endif
 
-static void update_state();
-
-public:
-  static void init();
-
-  static void tool_change(int tool);
-
-  static void set_enabled(const bool enable);
-  static void set_direction(const bool reverse);
-  static void set_ocr_power(const uint8_t value);
-  static void set_power(const cutter_power_t value);
-
-  static inline void kill_all()
-  {
-  }
-
+#endif // HAS_SINGLE_CUTTER
 #endif // HAS_CUTTER

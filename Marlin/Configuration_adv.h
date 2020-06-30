@@ -3021,6 +3021,8 @@
   #endif
 
   #if HAS_SPINDLE_TYPE(VFD_H2x)
+    #define VFD_MODBUS                            // VFD_H2x implies RS485 modbus
+
     /**
      * Configuration for RS-485 controlled Huanyang H2A/H2B/H2C VFD's.
      *
@@ -3036,18 +3038,42 @@
      * errors. When communication errors happen frequently, the baud rate should be set lower. Both
      * the VFD and the configuration settings must match, or the device won't work.
      */
-
-    #define VFD_H2x_RX_PIN 17          // RS-485 RX pin
-    #define VFD_H2x_TX_PIN 16          // RS-485 TX pin
-    #define VFD_H2x_RTS_PIN 25         // RS-485 RTS pin
-     //#define VFD_H2x_RTS_PIN 23         // RS-485 RTS pin #2 when not using a single pin for both RX and TX RTS
                                        
-    #define VFD_H2x_BAUD 19200         // Baud rate of VFD. 9600 baud is the VFD default, but 19200 should be feasible for most configurations.
     #define VFD_H2x_ADDRESS 1          // Modbus address of the VFD
-    #define VFD_H2x_PARITY SERIAL_8E1  // VFD default. Note that SERIAL_8N1 is the only setting supported by SoftwareSerial.
 
-    // #define VFD_H2x_RS485_DEBUG     // VFD debugging, not so chatty
-    // #define VFD_H2x_RS485_DEBUG_PCK // VFD debugging of communication packages; very chatty, but can be helpful to spot communication issues
+    // #define VFD_H2X_DEBUG           // VFD debugging, not so chatty
+
+  #endif
+
+  #if ENABLED(VFD_MODBUS)
+    /**
+     * Configuration for RS-485 controlled VFD's that use modbus. Each individual VFD has its own address,
+     * and should be chained to the same MAX485 controller.
+     *
+     * The baud rate of the VFD should be set as high as possible, that is: as high as possible without
+     * any packet loss. 9600 baud is the most common VFD default, but 19200 should be feasible for most
+     * configurations, especially when using a (shielded) cable.
+     *
+     * As for serial, we prefer HardwareSerial, for the simple reason that parity like SERIAL_8E1 is not 
+     * supported by SoftwareSerial. If you have to use SoftwareSerial, use SERIAL_8N1. If not, prefer
+     * some configuration that uses parity. The default of most VFD's is SERIAL_8E1.
+     *
+     * Check the manual of your VFD for details!
+     *
+     * NOTE: For Modbus, you also need to set the right pin configuration in your boards configuration.
+     * These are VFD_MODBUS_RX_PIN, VFD_MODBUS_TX_PIN and VFD_MODBUS_RTS_PIN.
+     */
+
+    #define VFD_MODBUS_BAUD 19200         // 19200 should be fine for most cables.
+    #define VFD_MODBUS_PARITY SERIAL_8E1  // SERIAL_8N1 is the only supported setting for SoftwareSerial.
+
+    /**
+     * VFD debugging of communication packages; very chatty, but can be helpful to identify
+     * communication issues. Don't use this if everything is running smoothly; it *will*
+     * generate a lot of traffic.
+     */
+    // #define VFD_MODBUS_DEBUG           // Dumps all modbus packages
+
   #endif
 
 #endif // CUTTER_FEATURE

@@ -147,7 +147,7 @@
     <ClInclude Include="src\feature\cutters\pwm_spindle.h" />
     <ClInclude Include="src\feature\cutters\spindle_laser.h" />
     <ClInclude Include="src\feature\cutters\vfd_h2x.h" />
-    <ClInclude Include="src\feature\cutters\vfd_spindle.h" />
+    <ClInclude Include="src\feature\cutters\vfd_modbus.h" />
     <ClInclude Include="src\feature\dac\dac_dac084s085.h" />
     <ClInclude Include="src\feature\dac\dac_mcp4728.h" />
     <ClInclude Include="src\feature\dac\stepper_dac.h" />
@@ -921,8 +921,10 @@
     <ClCompile Include="src\feature\caselight.cpp" />
     <ClCompile Include="src\feature\closedloop.cpp" />
     <ClCompile Include="src\feature\controllerfan.cpp" />
+    <ClCompile Include="src\feature\cutters\debug_cutter.cpp" />
     <ClCompile Include="src\feature\cutters\spindle_laser.cpp" />
-    <ClCompile Include="src\feature\cutters\vfd_spindle.cpp" />
+    <ClCompile Include="src\feature\cutters\vfd_h2x.cpp" />
+    <ClCompile Include="src\feature\cutters\vfd_modbus.cpp" />
     <ClCompile Include="src\feature\dac\dac_dac084s085.cpp" />
     <ClCompile Include="src\feature\dac\dac_mcp4728.cpp" />
     <ClCompile Include="src\feature\dac\stepper_dac.cpp" />

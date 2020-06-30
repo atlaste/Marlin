@@ -216,6 +216,9 @@ public:
 
   static inline void kill_all()
   {
+    // KILL first, then SYNC until it's done! We want to stop everything as
+    // quickly as possible if someone asks for a kill for whatever reasons.
+
 #if HAS_SINGLE_CUTTER
     cutter1.kill();
 #elif HAS_CUTTER_INST(1)
@@ -232,6 +235,24 @@ public:
 
 #if HAS_CUTTER_INST(4)
     cutter4.kill();
+#endif
+
+#if HAS_SINGLE_CUTTER
+    cutter1.kill_sync();
+#elif HAS_CUTTER_INST(1)
+    cutter1.kill_sync();
+#endif
+
+#if HAS_CUTTER_INST(2)
+    cutter2.kill_sync();
+#endif
+
+#if HAS_CUTTER_INST(3)
+    cutter3.kill_sync();
+#endif
+
+#if HAS_CUTTER_INST(4)
+    cutter4.kill_sync();
 #endif
   }
 

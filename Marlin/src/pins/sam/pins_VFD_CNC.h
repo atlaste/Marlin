@@ -77,6 +77,15 @@
 #define Z_ENABLE_PIN                           42
 
 //
+// RS-485 Modbus (spindle)
+//
+
+#define VFD_MODBUS_RX_PIN                      17  // RS-485 RX pin
+#define VFD_MODBUS_TX_PIN                      16  // RS-485 TX pin
+#define VFD_MODBUS_RTS_PIN                     25  // RS-485 RTS pin
+// #define VFD_MODBUS_RTS_PIN                  23  // RS-485 RTS pin #2 when not using a single pin for both RX and TX RTS
+
+//
 // Heaters / Fans
 //
 #define HEATER_0_PIN                           55  // "Hold":   Analog pin 1, Digital pin 55

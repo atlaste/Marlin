@@ -26,46 +26,15 @@
  // For other VFD's, the implementation is pretty much the same, but with
  // slightly different commands. 
 
-#include "vfd_spindle.h"
+#include "../../inc/MarlinConfig.h"
 
 #if HAS_CUTTER_TYPE(VFD_H2X)
 
-#if defined(__SAM3X8E__) || defined(__SAMD21G18A__)
-#if (VFD_RX_PIN == 19 && VFD_TX_PIN == 18)
-#include <HardwareSerial.h>
-#define VFDSerial Serial1
-#elif (VFD_RX_PIN == 17 && VFD_TX_PIN == 16)
-#include <HardwareSerial.h>
-#define VFDSerial Serial2
-#elif (VFD_RX_PIN == 15 && VFD_TX_PIN == 14)
-#include <HardwareSerial.h>
-#define VFDSerial Serial3
-#endif
-#endif
-
-#if !defined(VFDSerial)
-#ifdef VFD_PARITY
-  #error "VFD parity is not supported when using software serial RX/TX ports";
-#endif
-
-#include "SoftwareSerial.h"
-SoftwareSerial VFDSerial(VFD_RX_PIN, VFD_TX_PIN); // RX, TX
-#define USE_SOFTWARE_SERIAL
-#endif
-
-#ifndef VFD_BAUD
-#error "You should define VFD_BAUD according to the VFD settings"
-#endif
+#include "vfd_spindle.h"
 
 #ifndef VFD_ADDRESS
 // VFD_ADDRESS is 1 in 99,99% of the cases
 #define VFD_ADDRESS 1
-#endif
-
-#ifndef VFD_MODBUS_PROTO
-// VFD_MODBUS_PROTO is 0 in 99,99% of the cases
-// F9.05 = 0 or 1, which indicates 1 or 2 byte length. 0 = default.
-#define VFD_MODBUS_PROTO 0
 #endif
 
 // Some static variable initialization:
