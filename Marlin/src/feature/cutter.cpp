@@ -54,4 +54,10 @@ CUTTER_INSTANCE_TYPE(4) Cutter::cutter4 CUTTER_INSTANCE_BUILD(4);
 #endif
 
 #endif // HAS_SINGLE_CUTTER
+
+
+#if HAS_LCD_MENU
+cutter_power_t Cutter::menuPower = 0;
+#endif
+
 #endif // HAS_CUTTER

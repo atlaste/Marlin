@@ -169,11 +169,11 @@ public:
 #else
   static inline void tool_change(const uint8_t tool)
   {
-    // TODO FIXME: Fix mapping of tool <> instance!? Is this implementation correct?
-
+    // TODO FIXME: Fix mapping of tool <> instance!? Is this implementation correctly?
     if (current != nullptr) {
       current->kill();
     }
+
     current = get_cutter_instance(tool);
     currentProperties = current->cutter_info();
   }
@@ -184,11 +184,13 @@ public:
     state.enabled = enable;
     update_state();
   }
+
   static inline void set_direction(const bool reverse)
   {
     state.direction = reverse ? -1 : 1;
     update_state();
   }
+
   static void set_ocr_power(const uint8_t value)
   {
     // While it might seem like a good solution to set the OCR power directly
@@ -259,6 +261,58 @@ public:
   /**
    * Part 2 of the cutter code: translation of information from the cutter to the UI.
    */
+
+  static inline bool enabled()
+  {
+    return state.enabled();
+  }
+
+  static inline bool isReady()
+  {
+#if HAS_SINGLE_CUTTER
+    return current.isReady();
+#else
+    return current->isReady();
+#endif
+  }
+
+#if HAS_LCD_MENU
+  cutter_power_t menuPower; // Power set via LCD menu in PWM, PERCENT, or RPM
+
+  static inline bool mpower_min() { return currentProperties.min_speed; }
+  static inline bool mpower_max() { return currentProperties.max_speed; }
+
+  static inline void enable_with_dir(const bool reverse) {
+    isReady = true;
+
+    // TODO FIXME: should we translate PWM/Percent to RPM?
+    
+    set_power(menuPower);
+    set_direction(reverse);
+    set_enabled(true);
+  }
+
+  FORCE_INLINE static void enable_forward() { enable_with_dir(false); }
+  FORCE_INLINE static void enable_reverse() { enable_with_dir(true); }
+
+  static inline void update_from_mpower() {
+    state.speed = menuPower;
+    if (isReady)
+    {
+      update_state();
+    }
+  }
+
+  static inline void apply_block_power(const uint8_t inpow)
+  {
+#if HAS_SINGLE_CUTTER
+    return current.apply_power_immediately(inpow);
+#else
+    return current->apply_power_immediately(inpow);
+#endif
+  }
+
+#endif
 };
 
 extern Cutter cutter;

@@ -42,7 +42,12 @@ struct CutterProperties
   /**
    * Has reverse:
    */
-  bool has_reverse
+  bool has_reverse;
+
+  /**
+   * Supports ocr (0-255) speed:
+   */
+  bool supports_ocr;
 };
 
 /**
@@ -66,4 +71,7 @@ public:
   
   virtual void kill() = 0;
   virtual void kill_sync() = 0;
+
+  // ???
+  virtual bool isReady() = 0;
 };

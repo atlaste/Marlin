@@ -43,7 +43,6 @@
 // #define _MAP(N,S1,S2,D1,D2) ((N)*_MAX((D2)-(D1),0)/_MAX((S2)-(S1),1)+(D1))
 
 class SpindleLaser {
-public:
   static constexpr float
     min_pct = round(TERN(CUTTER_POWER_RELATIVE, 0, (100 * float(SPEED_POWER_MIN) / TERN(SPINDLE_FEATURE, float(SPEED_POWER_MAX), 100)))),
     max_pct = round(TERN(SPINDLE_FEATURE, 100, float(SPEED_POWER_MAX)));
@@ -54,6 +53,7 @@ public:
   static const inline uint8_t cpwr_to_pct(const cutter_cpower_t cpwr) { // configured value to pct
     return unitPower ? round(100 * (cpwr - SPEED_POWER_FLOOR) / (SPEED_POWER_MAX - SPEED_POWER_FLOOR)) : 0;
   }
+public:
 
   // Convert a configured value (cpower)(ie SPEED_POWER_STARTUP) to unit power (upwr, upower),
   // which can be PWM, Percent, or RPM (rel/abs).
@@ -80,6 +80,7 @@ public:
     return upwr;
   }
 
+  // Menu min / max
   static const cutter_power_t mpower_min() { return cpwr_to_upwr(SPEED_POWER_MIN); }
   static const cutter_power_t mpower_max() { return cpwr_to_upwr(SPEED_POWER_MAX); }
 
