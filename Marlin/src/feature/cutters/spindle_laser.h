@@ -26,12 +26,12 @@
  * Support for Laser Power or Spindle Power & Direction
  */
 
-#include "../inc/MarlinConfig.h"
+#include "../../inc/MarlinConfig.h"
 
-#include "spindle_laser_types.h"
+#include "../spindle_laser_types.h"
 
 #if ENABLED(LASER_POWER_INLINE)
-  #include "../module/planner.h"
+  #include "../../module/planner.h"
 #endif
 
 #define PCT_TO_PWM(X) ((X) * 255 / 100)

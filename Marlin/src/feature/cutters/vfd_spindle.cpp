@@ -28,8 +28,7 @@
 
 #include "vfd_spindle.h"
 
-#if HAS_CUTTER
-#ifdef SPINDLE_VFD
+#if HAS_CUTTER_TYPE(VFD_H2X)
 
 #if defined(__SAM3X8E__) || defined(__SAMD21G18A__)
 #if (VFD_RX_PIN == 19 && VFD_TX_PIN == 18)
@@ -613,5 +612,4 @@ void VFDSpindle::set_direction(const bool reverse)
   }
 }
 
-#endif // SPINDLE_VFD
-#endif // HAS_CUTTER
+#endif // HAS_CUTTER_TYPE(VFD_H2X)

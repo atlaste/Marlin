@@ -430,6 +430,9 @@
     <Filter Include="__vm">
       <UniqueIdentifier>{e040cd81-569c-48e6-8fd5-3553a6dc06e5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\feature\cutters">
+      <UniqueIdentifier>{36d03765-5d9b-4153-a770-f1d247df155d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\core\multi_language.cpp">
@@ -568,9 +571,6 @@
       <Filter>src\feature</Filter>
     </ClCompile>
     <ClCompile Include="src\feature\solenoid.cpp">
-      <Filter>src\feature</Filter>
-    </ClCompile>
-    <ClCompile Include="src\feature\spindle_laser.cpp">
       <Filter>src\feature</Filter>
     </ClCompile>
     <ClCompile Include="src\feature\tmc_util.cpp">
@@ -2025,7 +2025,13 @@
     <ClCompile Include="src\sd\usb_flashdrive\Sd2Card_FlashDrive.cpp">
       <Filter>src\sd\usb_flashdrive</Filter>
     </ClCompile>
-    <ClCompile Include="src\feature\vfd_spindle.cpp">
+    <ClCompile Include="src\feature\cutters\vfd_spindle.cpp">
+      <Filter>src\feature\cutters</Filter>
+    </ClCompile>
+    <ClCompile Include="src\feature\cutters\spindle_laser.cpp">
+      <Filter>src\feature\cutters</Filter>
+    </ClCompile>
+    <ClCompile Include="src\feature\cutter.cpp">
       <Filter>src\feature</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2178,9 +2184,6 @@
       <Filter>src\feature</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\solenoid.h">
-      <Filter>src\feature</Filter>
-    </ClInclude>
-    <ClInclude Include="src\feature\spindle_laser.h">
       <Filter>src\feature</Filter>
     </ClInclude>
     <ClInclude Include="src\feature\tmc_util.h">
@@ -4354,11 +4357,38 @@
     </ClInclude>
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="Configuration_adv.h" />
-    <ClInclude Include="src\feature\vfd_spindle.h">
-      <Filter>src\feature</Filter>
-    </ClInclude>
     <ClInclude Include="src\pins\sam\pins_VFD_CNC.h">
       <Filter>src\pins\sam</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\spindle_laser.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\vfd_spindle.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\cutter_base.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\pwm_spindle.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\pwm_laser.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\vfd_h2x.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\pwm_cutter_base.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutter.h">
+      <Filter>src\feature</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutters\debug_cutter.h">
+      <Filter>src\feature\cutters</Filter>
+    </ClInclude>
+    <ClInclude Include="src\feature\cutter_types.h">
+      <Filter>src\feature</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

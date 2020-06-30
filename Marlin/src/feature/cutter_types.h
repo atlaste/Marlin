@@ -23,6 +23,7 @@
 
 /**
  * feature/spindle_laser_types.h
+ *
  * Support for Laser Power or Spindle Power & Direction
  */
 
@@ -35,14 +36,14 @@
 #endif
 #define MSG_CUTTER(M) _MSG_CUTTER(M)
 
-typedef IF<(SPEED_POWER_MAX > 255), uint16_t, uint8_t>::type cutter_cpower_t;
+typedef uint16_t cutter_cpower_t;
 
-#if CUTTER_UNIT_IS(RPM) && SPEED_POWER_MAX > 255
-  typedef uint16_t cutter_power_t;
+#if CUTTER_POWER_UNIT_DISPLAY_IS(RPM) && SPEED_POWER_MAX > 255
+  typedef uint16_t cutter_power_display_t;
   #define CUTTER_MENU_POWER_TYPE uint16_5
   #define cutter_power2str       ui16tostr5rj
 #else
-  typedef uint8_t cutter_power_t;
+  typedef uint8_t cutter_power_display_t;
   #define CUTTER_MENU_POWER_TYPE uint8
   #define cutter_power2str       ui8tostr3rj
 #endif
@@ -51,3 +52,5 @@ typedef IF<(SPEED_POWER_MAX > 255), uint16_t, uint8_t>::type cutter_cpower_t;
   typedef uint16_t cutter_frequency_t;
   #define CUTTER_MENU_FREQUENCY_TYPE uint16_5
 #endif
+
+typedef uint16_t cutter_power_t;

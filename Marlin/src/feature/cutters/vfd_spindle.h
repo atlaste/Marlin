@@ -5,7 +5,7 @@
  * Support for VFD Spindles with direction, on/off and rpm management
  */
 
-#include "../inc/MarlinConfig.h"
+#include "../../inc/MarlinConfig.h"
 
 #if ENABLED(SPINDLE_VFD)
 #define _MSG_CUTTER(M) MSG_SPINDLE_##M

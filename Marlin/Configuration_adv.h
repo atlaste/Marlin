@@ -2794,6 +2794,8 @@
  * Add the M3, M4, and M5 commands to turn the spindle/laser on and off, and
  * to set spindle speed, spindle direction, and laser power.
  *
+ * 
+ *
  * SuperPid is a router/spindle speed controller used in the CNC milling community.
  * Marlin can be used to turn the spindle on and off. It can also be used to set
  * the spindle speed from 5,000 to 30,000 RPM.
@@ -2804,159 +2806,252 @@
  * See https://marlinfw.org/docs/configuration/laser_spindle.html for more config details.
  */
 
- // #define SPINDLE_FEATURE
- // #define LASER_FEATURE
-#if EITHER(SPINDLE_FEATURE, LASER_FEATURE)
-#define SPINDLE_LASER_ACTIVE_HIGH     false  // Set to "true" if the on/off function is active HIGH
-#define SPINDLE_LASER_PWM             true   // Set to "true" if your controller supports setting the speed/power
-#define SPINDLE_LASER_PWM_INVERT      false  // Set to "true" if the speed/power goes up when you want it to go slower
+#define CUTTER_FEATURE
 
-#define SPINDLE_LASER_FREQUENCY       2500   // (Hz) Spindle/laser frequency (only on supported HALs: AVR and LPC)
-
-/**
- * Speed / Power can be set ('M3 S') and displayed in terms of:
- *  - PWM255  (S0 - S255)
- *  - PERCENT (S0 - S100)
- *  - RPM     (S0 - S50000)  Best for use with a spindle
- */
-#define CUTTER_POWER_UNIT PWM255
-
- /**
-  * Relative Cutter Power
-  * Normally, 'M3 O<power>' sets
-  * OCR power is relative to the range SPEED_POWER_MIN...SPEED_POWER_MAX.
-  * so input powers of 0...255 correspond to SPEED_POWER_MIN...SPEED_POWER_MAX
-  * instead of normal range (0 to SPEED_POWER_MAX).
-  * Best used with (e.g.) SuperPID router controller: S0 = 5,000 RPM and S255 = 30,000 RPM
-  */
-  //#define CUTTER_POWER_RELATIVE              // Set speed proportional to [SPEED_POWER_MIN...SPEED_POWER_MAX]
-
-#if ENABLED(SPINDLE_FEATURE)
-  //#define SPINDLE_CHANGE_DIR               // Enable if your spindle controller can change spindle direction
-#define SPINDLE_CHANGE_DIR_STOP            // Enable if the spindle should stop before changing spin direction
-#define SPINDLE_INVERT_DIR          false  // Set to "true" if the spin direction is reversed
-
-#define SPINDLE_LASER_POWERUP_DELAY   5000 // (ms) Delay to allow the spindle/laser to come up to speed/power
-#define SPINDLE_LASER_POWERDOWN_DELAY 5000 // (ms) Delay to allow the spindle to stop
-
-/**
- * M3/M4 Power Equation
- *
- * Each tool uses different value ranges for speed / power control.
- * These parameters are used to convert between tool power units and PWM.
- *
- * Speed/Power = (PWMDC / 255 * 100 - SPEED_POWER_INTERCEPT) / SPEED_POWER_SLOPE
- * PWMDC = (spdpwr - SPEED_POWER_MIN) / (SPEED_POWER_MAX - SPEED_POWER_MIN) / SPEED_POWER_SLOPE
- */
-#define SPEED_POWER_INTERCEPT         0    // (%) 0-100 i.e., Minimum power percentage
-#define SPEED_POWER_MIN            5000    // (RPM)
-#define SPEED_POWER_MAX           30000    // (RPM) SuperPID router controller 0 - 30,000 RPM
-#define SPEED_POWER_STARTUP       25000    // (RPM) M3/M4 speed/power default (with no arguments)
-
-#else
-
-#define SPEED_POWER_INTERCEPT         0    // (%) 0-100 i.e., Minimum power percentage
-#define SPEED_POWER_MIN               0    // (%) 0-100
-#define SPEED_POWER_MAX             100    // (%) 0-100
-#define SPEED_POWER_STARTUP          80    // (%) M3/M4 speed/power default (with no arguments)
-
-/**
- * Enable inline laser power to be handled in the planner / stepper routines.
- * Inline power is specified by the I (inline) flag in an M3 command (e.g., M3 S20 I)
- * or by the 'S' parameter in G0/G1/G2/G3 moves (see LASER_MOVE_POWER).
- *
- * This allows the laser to keep in perfect sync with the planner and removes
- * the powerup/down delay since lasers require negligible time.
- */
-#define LASER_POWER_INLINE
-
-#if ENABLED(LASER_POWER_INLINE)
- /**
-  * Scale the laser's power in proportion to the movement rate.
-  *
-  * - Sets the entry power proportional to the entry speed over the nominal speed.
-  * - Ramps the power up every N steps to approximate the speed trapezoid.
-  * - Due to the limited power resolution this is only approximate.
-  */
-#define LASER_POWER_INLINE_TRAPEZOID
+#if ENABLED(CUTTER_FEATURE)
+  /**
+   * Cutter configuration. This part of the configuration defines how cutters are displayed,
+   * and how g-code is interpreted and translated. This also defines inlining features of
+   * lasers and how information is displayed.
+   *
+   * Individual cutters are configured per type.
+   */
 
   /**
-   * Continuously calculate the current power (nominal_power * current_rate / nominal_rate).
-   * Required for accurate power with non-trapezoidal acceleration (e.g., S_CURVE_ACCELERATION).
-   * This is a costly calculation so this option is discouraged on 8-bit AVR boards.
-   *
-   * LASER_POWER_INLINE_TRAPEZOID_CONT_PER defines how many step cycles there are between power updates. If your
-   * board isn't able to generate steps fast enough (and you are using LASER_POWER_INLINE_TRAPEZOID_CONT), increase this.
-   * Note that when this is zero it means it occurs every cycle; 1 means a delay wait one cycle then run, etc.
+   * Speed / Power can be set depending on the device type ('M3 S'). This setting controls how 
+   * this value is displayed on an optional LCD, in terms of:
+   *  - PWM255  (0 - 255)
+   *  - PERCENT (0 - 100)
+   *  - RPM     (0 - 50000)  Best for use with a spindle
    */
-   //#define LASER_POWER_INLINE_TRAPEZOID_CONT
+  #define CUTTER_POWER_UNIT_DISPLAY RPM
 
-   /**
-    * Stepper iterations between power updates. Increase this value if the board
-    * can't keep up with the processing demands of LASER_POWER_INLINE_TRAPEZOID_CONT.
-    * Disable (or set to 0) to recalculate power on every stepper iteration.
+  /**
+   * If you have a setup with multiple spindles, or a combination between a spindle and a VFD,
+   * you should configure the number of spindles, as well as the way the protocol with these
+   * spindles work. Up to 4 spindles are currently supported, which should be more than enough
+   * for most setups.
+   *
+   * SPINDLE_1_TYPE evaluates to the default spindle.
+   *
+   * Currently supported cutter types: VFD_H2x, PWM_LASER, PWM_SPINDLE
+   * 
+   * Known other spindle types, which are not implemented yet: Brushless DC Speed controllers (BESC),
+   * analog DAC, Modbus VFD, other Huanyang VFD, (usually relay based) digital input, on/off relay
+   * spindles (kress is a common choice).
+   */
+  #define CUTTER_TYPE_1 VFD_H2x
+  #define CUTTER_TYPE_2 PWM_LASER
+  #define CUTTER_TYPE_3 PWM_SPINDLE
+  // #define CUTTER_TYPE_4 PWM_SPINDLE
+
+  /**
+   * If you have multiple spindles or spindle/laser combinations, the way to change between these
+   * is to do a tool change.
+   *
+   * Marlin defines T0, T1, T2, T3, T4, T5, T6 in G-Code: https://marlinfw.org/docs/gcode/T001-T002.html
+   * Note that enabling tool changes for spindle selection is optional, and is only relevant if multiple
+   * spindles are present in your system.
+   */
+  #define CUTTER_TOOL_1 0 // Maps to T0
+  #define CUTTER_TOOL_2 2 // Maps to T2
+  #define CUTTER_TOOL_3 3 // Maps to T3
+  // #define CUTTER_TOOL_4 4 // Maps to T4
+
+
+  /**
+    * Enable inline laser power to be handled in the planner / stepper routines.
+    * Inline power is specified by the I (inline) flag in an M3 command (e.g., M3 S20 I)
+    * or by the 'S' parameter in G0/G1/G2/G3 moves (see LASER_MOVE_POWER).
+    *
+    * This allows the laser to keep in perfect sync with the planner and removes
+    * the powerup/down delay since lasers require negligible time.
     */
-    //#define LASER_POWER_INLINE_TRAPEZOID_CONT_PER 10
+  #define LASER_POWER_INLINE
 
+  #if ENABLED(LASER_POWER_INLINE)
+    #define PWM_LASER_POWERUP_DELAY   0       // (ms) Delay to allow the laser to come up to power
+    #define PWM_LASER_POWERDOWN_DELAY 0       // (ms) Delay to allow the spindle to stop
+
+    /**
+     * Scale the laser's power in proportion to the movement rate.
+     *
+     * - Sets the entry power proportional to the entry speed over the nominal speed.
+     * - Ramps the power up every N steps to approximate the speed trapezoid.
+     * - Due to the limited power resolution this is only approximate.
+     */
+     #define LASER_POWER_INLINE_TRAPEZOID
+    
+    /**
+     * Continuously calculate the current power (nominal_power * current_rate / nominal_rate).
+     * Required for accurate power with non-trapezoidal acceleration (e.g., S_CURVE_ACCELERATION).
+     * This is a costly calculation so this option is discouraged on 8-bit AVR boards.
+     *
+     * LASER_POWER_INLINE_TRAPEZOID_CONT_PER defines how many step cycles there are between power updates. If your
+     * board isn't able to generate steps fast enough (and you are using LASER_POWER_INLINE_TRAPEZOID_CONT), increase this.
+     * Note that when this is zero it means it occurs every cycle; 1 means a delay wait one cycle then run, etc.
+     */
+     //#define LASER_POWER_INLINE_TRAPEZOID_CONT
+    
+    /**
+     * Stepper iterations between power updates. Increase this value if the board
+     * can't keep up with the processing demands of LASER_POWER_INLINE_TRAPEZOID_CONT.
+     * Disable (or set to 0) to recalculate power on every stepper iteration.
+     */
+    //#define LASER_POWER_INLINE_TRAPEZOID_CONT_PER 10
+    
     /**
      * Include laser power in G0/G1/G2/G3/G5 commands with the 'S' parameter
      */
-     //#define LASER_MOVE_POWER
+    //#define LASER_MOVE_POWER
+    
+    #if ENABLED(LASER_MOVE_POWER)
+      // Turn off the laser on G0 moves with no power parameter.
+      // If a power parameter is provided, use that instead.
+      //#define LASER_MOVE_G0_OFF
+    
+      // Turn off the laser on G28 homing.
+      //#define LASER_MOVE_G28_OFF
+    #endif
+    
+    /**
+     * Inline flag inverted
+     *
+     * WARNING: M5 will NOT turn off the laser unless another move
+     *          is done (so G-code files must end with 'M5 I').
+     */
+    //#define LASER_POWER_INLINE_INVERT
+    
+    /**
+     * Continuously apply inline power. ('M3 S3' == 'G1 S3' == 'M3 S3 I')
+     *
+     * The laser might do some weird things, so only enable this
+     * feature if you understand the implications.
+     */
+    //#define LASER_POWER_INLINE_CONTINUOUS
+  #endif
 
-#if ENABLED(LASER_MOVE_POWER)
-  // Turn off the laser on G0 moves with no power parameter.
-  // If a power parameter is provided, use that instead.
-  //#define LASER_MOVE_G0_OFF
+  /**
+   * Configuration of individual cutters starts here:
+   */
 
-  // Turn off the laser on G28 homing.
-  //#define LASER_MOVE_G28_OFF
-#endif
+  #if HAS_CUTTER_TYPE(PWM_SPINDLE)
+    /**
+     * PWM controlled spindles (which includes simple on-off spindles).
+     */
+    #define PWM_SPINDLE_ACTIVE_HIGH     false  // Set to "true" if the on/off function is active HIGH
+    #define PWM_SPINDLE_PWM             true   // Set to "true" if your controller supports setting the speed/power
+    #define PWM_SPINDLE_PWM_INVERT      false  // Set to "true" if the speed/power goes up when you want it to go slower
+    
+    #define PWM_SPINDLE_FREQUENCY       2500   // (Hz) Spindle/laser frequency (only on supported HALs: AVR and LPC)
 
-/**
- * Inline flag inverted
- *
- * WARNING: M5 will NOT turn off the laser unless another move
- *          is done (so G-code files must end with 'M5 I').
- */
- //#define LASER_POWER_INLINE_INVERT
+    /**
+     * Relative Cutter Power
+     *
+     * Normally, 'M3 O<power>' sets
+     * OCR power is relative to the range PWM_SPINDLE_SPEED_MIN...PWM_SPINDLE_SPEED_MAX.
+     * so input powers of 0...255 correspond to PWM_SPINDLE_SPEED_MIN...PWM_SPINDLE_SPEED_MAX.
+     * instead of normal range (0 to PWM_SPINDLE_SPEED_MAX).
+     *
+     * Best used with (e.g.) SuperPID router controller: S0 = 5,000 RPM and S255 = 30,000 RPM
+     */
+    //#define PWM_SPINDLE_POWER_RELATIVE            // Set speed proportional to [SPEED_POWER_MIN...SPEED_POWER_MAX]
+    
+    //#define PWM_SPINDLE_CHANGE_DIR               // Enable if your spindle controller can change spindle direction
+    #define PWM_SPINDLE_CHANGE_DIR_STOP            // Enable if the spindle should stop before changing spin direction
+    #define PWM_SPINDLE_INVERT_DIR          false  // Set to "true" if the spin direction is reversed
+    
+    #define PWM_SPINDLE_POWERUP_DELAY   5000       // (ms) Delay to allow the spindle/laser to come up to speed/power
+    #define PWM_SPINDLE_POWERDOWN_DELAY 5000       // (ms) Delay to allow the spindle to stop
 
- /**
-  * Continuously apply inline power. ('M3 S3' == 'G1 S3' == 'M3 S3 I')
-  *
-  * The laser might do some weird things, so only enable this
-  * feature if you understand the implications.
-  */
-  //#define LASER_POWER_INLINE_CONTINUOUS
+    /**
+     * M3/M4 Power Equation for PWM spindles; used to convert between RPM and PWM signal
+     *
+     * Each tool uses different value ranges for speed / power control.
+     * These parameters are used to convert between tool power units and PWM.
+     *
+     * Speed/Power = (PWMDC / 255 * 100 - SPEED_POWER_INTERCEPT) / SPEED_POWER_SLOPE
+     * PWMDC = (spdpwr - SPEED_POWER_MIN) / (SPEED_POWER_MAX - SPEED_POWER_MIN) / SPEED_POWER_SLOPE
+     */
+    #define PWM_SPINDLE_SPEED_INTERCEPT         0    // (%) 0-100 i.e., Minimum power percentage
+    #define PWM_SPINDLE_SPEED_MIN            5000    // (RPM)
+    #define PWM_SPINDLE_SPEED_MAX           30000    // (RPM) SuperPID router controller 0 - 30,000 RPM
+    #define PWM_SPINDLE_SPEED_STARTUP       25000    // (RPM) M3/M4 speed/power default (with no arguments)
+  #endif
 
-#else
+  #if HAS_SPINDLE_TYPE(PWM_LASER)
+  /**
+   * PWM controlled lasers.
+   *
+   * WARNING: Lasers are very dangerous pieces of hardware, and can instantly make people blind
+   * or cause serious burns when handled incorrectly. ALWAYS wear protective equipment while
+   * near them, and NEVER play around with wiring or settings while having the laser powered on!
+   */
+  #define PWM_LASER_ACTIVE_HIGH     false     // Set to "true" if the on/off function is active HIGH
+  #define PWM_LASER_PWM_INVERT      false     // Set to "true" if the power goes up when you want it to go down
+  #define PWM_LASER_FREQUENCY       2500      // (Hz) Spindle/laser frequency (only on supported HALs: AVR and LPC)
 
-#define SPINDLE_LASER_POWERUP_DELAY     50 // (ms) Delay to allow the spindle/laser to come up to speed/power
-#define SPINDLE_LASER_POWERDOWN_DELAY   50 // (ms) Delay to allow the spindle to stop
+   /**
+    * Relative Cutter Power
+    *
+    * Normally, 'M3 O<power>' sets
+    * OCR power is relative to the range SPEED_POWER_MIN...SPEED_POWER_MAX.
+    * so input powers of 0...255 correspond to SPEED_POWER_MIN...SPEED_POWER_MAX
+    * instead of normal range (0 to SPEED_POWER_MAX).
+    */
+    //#define PWM_LASER_POWER_RELATIVE            // Set speed proportional to [SPEED_POWER_MIN...SPEED_POWER_MAX]
+    
+    //#define PWM_SPINDLE_CHANGE_DIR               // Enable if your spindle controller can change spindle direction
+    #define PWM_LASER_CHANGE_DIR_STOP            // Enable if the spindle should stop before changing spin direction
+    #define PWM_LASER_INVERT_DIR          false  // Set to "true" if the spin direction is reversed
+    
+    #define PWM_LASER_POWER_INTERCEPT         0    // (%) 0-100 i.e., Minimum power percentage
+    #define PWM_LASER_POWER_MIN               0    // (%) 0-100
+    #define PWM_LASER_POWER_MAX             100    // (%) 0-100
+    #define PWM_LASER_POWER_STARTUP          80    // (%) M3/M4 speed/power default (with no arguments)
+  
+    #if ENABLED(LASER_POWER_INLINE)
+      #define PWM_LASER_POWERUP_DELAY   0          // (ms) Delay to allow the laser to come up to power
+      #define PWM_LASER_POWERDOWN_DELAY 0          // (ms) Delay to allow the spindle to stop
+    #else 
+      #define PWM_LASER_LASER_POWERUP_DELAY     50 // (ms) Delay to allow the laser to come up to speed/power
+      #define PWM_LASER_LASER_POWERDOWN_DELAY   50 // (ms) Delay to allow the laser to stop
 
-#endif
-#endif
-#endif
+    #endif
+  #endif
 
- /**
-  * VFD Spindle
-  */
+  #if HAS_SPINDLE_TYPE(VFD_H2x)
+    /**
+     * Configuration for RS-485 controlled Huanyang H2A/H2B/H2C VFD's.
+     *
+     * WARNING: VFD's are very dangerous pieces of hardware, running on high voltage and delivering 
+     * lots of power to a spindle. NEVER play around with wiring, bits or settings while having the 
+     * VFD powered on!
+     *
+     * There's no need to configure things like RPM here, as these are automatically pulled from the
+     * VFD configuration.
+     *
+     * Communication happens through an RS-485 (unofficial) modbus protocol. When using shielded (and
+     * grounded) cables for modbus communication, 19200 baud should work just fine with no communication
+     * errors. When communication errors happen frequently, the baud rate should be set lower. Both
+     * the VFD and the configuration settings must match, or the device won't work.
+     */
 
-#define SPINDLE_VFD         // Enable if you have an RS-485 Huanyang VFD, f.ex. H2A, H2B, H2C
+    #define VFD_H2x_RX_PIN 17          // RS-485 RX pin
+    #define VFD_H2x_TX_PIN 16          // RS-485 TX pin
+    #define VFD_H2x_RTS_PIN 25         // RS-485 RTS pin
+     //#define VFD_H2x_RTS_PIN 23         // RS-485 RTS pin #2 when not using a single pin for both RX and TX RTS
+                                       
+    #define VFD_H2x_BAUD 19200         // Baud rate of VFD. 9600 baud is the VFD default, but 19200 should be feasible for most configurations.
+    #define VFD_H2x_ADDRESS 1          // Modbus address of the VFD
+    #define VFD_H2x_PARITY SERIAL_8E1  // VFD default. Note that SERIAL_8N1 is the only setting supported by SoftwareSerial.
 
-#if ENABLED(SPINDLE_VFD)
-  // NOTE: Only RPM mode makes sense for VFD spindles
+    // #define VFD_H2x_RS485_DEBUG     // VFD debugging, not so chatty
+    // #define VFD_H2x_RS485_DEBUG_PCK // VFD debugging of communication packages; very chatty, but can be helpful to spot communication issues
+  #endif
 
-#define VFD_RX_PIN 17     // RS-485 RX pin
-#define VFD_TX_PIN 16     // RS-485 TX pin
-#define VFD_RTS_PIN 25    // RS-485 RTS pin
- //#define VFD_RTS_PIN 23    // RS-485 RTS pin #2 when not using a single pin for both RX and TX
-#define VFD_BAUD 19200    // Baud rate of VFD. 1200 baud is more than enough, but will stall the rest... 38400 it is.
-#define VFD_ADDRESS 1     // Modbus address of the VFD
-#define VFD_PARITY SERIAL_8E1
+#endif // CUTTER_FEATURE
 
-#define VFD_RS485_DEBUG   // VFD debugging, not so chatty
-// #define VFD_RS485_DEBUG_PCK // VFD debugging of all communication, very chatty
-#endif
 
 /**
  * Coolant Control
